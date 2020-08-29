@@ -1,33 +1,64 @@
-import React, { useState, import { Socket } from 'dgram';
-import { parse } from 'url';
-useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 import queryString from 'query-string'
+import InfoBar from '../infoBar/InfoBar';
+import Input from '../Input/Input';
 
-let Socket;
+import './Chat.css';
+let socket;
 
 const Chat = ({ location }) => {
     const [name, setName] = useState('')
     const [room, setRoom] = useState('')
+    const [users, setUsers] = useState('')
+    const [message, setMessage] = useState('')
+    const [messages, setMessages] = useState([])
     const ENDPOINT = 'localhost:5000'
 
 
     useEffect(() => {
-        const { name, room } from queryString.parse(location.search)
+        const { name, room } = queryString.parse(location.search)
 
         socket = io(ENDPOINT)
 
         setName(name)
         setRoom(room)
 
-        Socket.emit('join', { name, room })
+        socket.emit('join', { name, room }, () => {
 
+        })
+
+        return () => {
+            socket.emit('disconnect')
+            
+            socket.off()
+        }
     }, [ENDPOINT, location.search])
 
+    //secons lifecycle method
+    useEffect(() => {
+        socket.on('message', (message) => {
+            setMessages(messages => [...messages, message])
+        })
+    }, [messages])
+
+    const sendMessage = (event) => {
+        event.preventDefault()
+
+        if (message) {
+            socket.emit('sendMessage', message, () => setMessage(''))
+        }
+    }
+
+    console.lot(message, messages)
+
     return (
-        <h1>
-            Chat
-        </h1>
+        <div className="outerContainer">
+            <div className="innerContainer">
+                <InfoBar room={room} />
+                <Input message={message} setMessa
+            </div>
+        </div>
     )
 }
 export default Chat
