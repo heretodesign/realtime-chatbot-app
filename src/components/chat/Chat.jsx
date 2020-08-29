@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 import queryString from 'query-string'
-import InfoBar from '../infoBar/InfoBar';
-import Input from '../Input/Input';
 
-import './Chat.css';
+import InfoBar from '../infoBar/InfoBar'
+import Input from '../input/Input'
+import Messages from '../messages/Messages'
+import TextContainer from '../textContainer/TextContainer'
+
+import './Chat.css'
 let socket;
 
 const Chat = ({ location }) => {
@@ -24,15 +27,11 @@ const Chat = ({ location }) => {
         setName(name)
         setRoom(room)
 
-        socket.emit('join', { name, room }, () => {
-
+        socket.emit('join', { name, room }, (error) => {
+            if(error) {
+                alert(error);
+            }
         })
-
-        return () => {
-            socket.emit('disconnect')
-            
-            socket.off()
-        }
     }, [ENDPOINT, location.search])
 
     //secons lifecycle method
@@ -40,7 +39,11 @@ const Chat = ({ location }) => {
         socket.on('message', (message) => {
             setMessages(messages => [...messages, message])
         })
-    }, [messages])
+
+        socket.on("roomData", ({ users }) => {
+            setUsers(users);
+        })
+    }, [])
 
     const sendMessage = (event) => {
         event.preventDefault()
@@ -54,11 +57,14 @@ const Chat = ({ location }) => {
 
     return (
         <div className="outerContainer">
-            <div className="innerContainer">
+            <div className="container">
                 <InfoBar room={room} />
-                <Input message={message} setMessa
+                <Messages messages={messages} />
+                <Input message={message} setMessage={setMessage} sendMessage={sendMessage} />
             </div>
+            <TextContainer users={users}/>
         </div>
     )
 }
+
 export default Chat
