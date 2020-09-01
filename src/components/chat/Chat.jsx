@@ -34,10 +34,10 @@ const Chat = ({ location }) => {
         })
     }, [ENDPOINT, location.search])
 
-    //secons lifecycle method
+    //second lifecycle method
     useEffect(() => {
         socket.on('message', (message) => {
-            setMessages(messages => [...messages, message])
+            setMessages(messages => [ ...messages, message])
         })
 
         socket.on("roomData", ({ users }) => {
@@ -53,7 +53,7 @@ const Chat = ({ location }) => {
         }
     }
 
-    console.lot(message, messages)
+    console.log(message, messages)
 
     return (
         <div className="outerContainer">
